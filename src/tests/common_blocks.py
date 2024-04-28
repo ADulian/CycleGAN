@@ -1,4 +1,5 @@
-""" Unit tests for the common_blocks
+"""
+Unit tests for the common_blocks
 """
 
 import torch

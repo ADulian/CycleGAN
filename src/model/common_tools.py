@@ -1,3 +1,8 @@
+"""
+A module that contains common functionalities for networks
+
+"""
+
 import torch.nn as nn
 
 # --------------------------------------------------------------------------------

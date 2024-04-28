@@ -1,3 +1,8 @@
+"""
+A module that contains common building blocks for building networks
+
+"""
+
 import torch.nn as nn
 
 
