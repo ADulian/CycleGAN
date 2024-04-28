@@ -1,6 +1,5 @@
 # CycleGAN
-
-
+![CycleGAN Example](/figures/cycle_gan_example.png)
 ## Introduction
 **CycleGAN** is a powerful technique for unsupervised image-to-image translation, 
 which learns to map images from one domain to another without requiring paired examples. 
