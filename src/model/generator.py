@@ -36,7 +36,7 @@ class Generator(nn.Module):
         """
         super().__init__()
 
-        # Encoder and Decoder
+        # --- Encoder and Decoder
         self.encoder = self._init_encoder()
         self.decoder = self._init_decoder()
 
