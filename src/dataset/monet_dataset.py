@@ -22,8 +22,8 @@ class MonetDataset(Dataset):
 
         # Paths
         self.root_path = Path(root_path)
-        self.monet_paths = list((self.root_path / "photo_jpg").iterdir())
-        self.photo_paths = list((self.root_path / "monet_jpg").iterdir())
+        self.monet_paths = list((self.root_path / "monet_jpg").iterdir())
+        self.photo_paths = list((self.root_path / "photo_jpg").iterdir())
 
     # --------------------------------------------------------------------------------
     def __len__(self):
