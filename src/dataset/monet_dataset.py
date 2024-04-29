@@ -62,6 +62,7 @@ class MonetDataset(Dataset):
 
         return x_monet, x_photo
 
+    # --------------------------------------------------------------------------------
     def to_tensor(self, x):
         """ Transform uint8 image [0,255] to torch float32 [-1,1]
 
@@ -76,6 +77,7 @@ class MonetDataset(Dataset):
 
         return torch.tensor(x, dtype=torch.float32).permute(2, 0, 1) / 127.5 - 1.0
 
+    # --------------------------------------------------------------------------------
     def read_img(self, path):
         """ Read img with cv2 and transform to RGB
 
