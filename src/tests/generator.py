@@ -8,6 +8,7 @@ import torch.nn as nn
 from src.model.common_blocks import Downsample, Upsample
 from src.model.generator import Generator
 
+# --------------------------------------------------------------------------------
 def test_generator_init():
     """ Test that the Generator class is initialized correctly.
 
@@ -21,6 +22,7 @@ def test_generator_init():
     assert hasattr(gen, 'out')
     assert hasattr(gen, 'act')
 
+# --------------------------------------------------------------------------------
 def test_generator_forward():
     """ Test that the forward method produces an output tensor with the correct shape.
 
@@ -33,6 +35,7 @@ def test_generator_forward():
     output_tensor = gen(input_tensor)
     assert output_tensor.shape == img_shape  # output shape should match input shape
 
+# --------------------------------------------------------------------------------
 def test_generator_encoder():
     """ Test that the encoder is a Sequential module with 7 Downsample blocks.
 
@@ -47,6 +50,7 @@ def test_generator_encoder():
     for layer in encoder:
         assert isinstance(layer, Downsample)
 
+# --------------------------------------------------------------------------------
 def test_generator_decoder():
     """ Test that the decoder is a Sequential module with 6 Upsample blocks.
 
@@ -60,6 +64,7 @@ def test_generator_decoder():
     for layer in decoder:
         assert isinstance(layer, Upsample)
 
+# --------------------------------------------------------------------------------
 def test_generator_out():
     """ Test that the out module is a ConvTranspose2d module with the correct parameters.
 
@@ -75,6 +80,7 @@ def test_generator_out():
     assert out.stride == (2, 2)
     assert out.padding == (1, 1)
 
+# --------------------------------------------------------------------------------
 def test_generator_act():
     """ Test that the act module is a Tanh module.
 

@@ -55,7 +55,7 @@ class Generator(nn.Module):
     # --------------------------------------------------------------------------------
     def forward(self,
                 x):
-        """ Generate x
+        """ Generate x_hat
 
         ---
         Parameters
