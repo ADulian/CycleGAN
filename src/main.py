@@ -19,7 +19,7 @@ if __name__ == '__main__':
     NUM_EPOCHS = 1
     BATCH_SIZE = 32
 
-    device = torch.device("cpu") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     # --- Model and Dataset
     print("Initialising Model and Dataset")
