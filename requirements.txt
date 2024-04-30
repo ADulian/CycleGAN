@@ -1,0 +1,8 @@
+--find-links https://download.pytorch.org/whl/cu118
+torch
+torchvision
+torchaudio
+numpy==1.26.4
+opencv_python==4.9.0.80
+pytest==8.2.0
+tqdm==4.66.2
