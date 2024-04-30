@@ -42,7 +42,8 @@ if __name__ == '__main__':
         with tqdm(total=len(data_loader),
                   desc=f"Epoch {i}/{NUM_EPOCHS}",
                   ascii=True,
-                  colour="green") as pbar:
+                  colour="green",
+                  dynamic_ncols=True) as pbar:
 
             # Per batch
             loss_batch = defaultdict(list)
