@@ -17,6 +17,9 @@ if __name__ == '__main__':
                         help='Number of training epochs')
     parser.add_argument('--batch_size', type=int, default=64,  # Max that fits onto 24GB GPU
                         help='Batch size for processing data (default: 64)')
+    parser.add_argument('--weights_path', type=str, default=None, # Path to load weights
+                        help='Load weights path')
+
 
     args = parser.parse_args()
 
@@ -27,4 +30,5 @@ if __name__ == '__main__':
                       device=device)
 
     # Fit
-    trainer.fit(num_epochs=args.num_epochs)
+    trainer.fit(num_epochs=args.num_epochs,
+                load_weights_path=args.weights_path)
