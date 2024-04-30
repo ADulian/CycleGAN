@@ -9,11 +9,32 @@ This repository implements the CycleGAN model as proposed in 2017 in the paper
 [*"Unpaired Image-to-Image Translation using Cycle-Consistent Adversarial Networks"*](https://openaccess.thecvf.com/content_ICCV_2017/papers/Zhu_Unpaired_Image-To-Image_Translation_ICCV_2017_paper.pdf)
 by Jun-Yan Zhu et al.
 
-## Dependencies
-
 ## Installation
+Install required packages with simple
+```
+pip install -r requirements.txt
+```
+Note that PyTorch will be installed with cu118 by default as specified in the `requirements.txt`
 
-## Usage
+## Quick start
+You can download the dataset directly from the following Kaggle's [website](https://www.kaggle.com/competitions/gan-getting-started/data). This implementation uses the `.jpg` files rather than `tfrec` by default. The structure of your dataset folder should look as follows:
+
+```
+- data/
+  - monet_jpg/  # All monet images
+  - photo_jpg/  # All photos
+```
+
+Once you've got your dataset and virtualenv all in place, navigate to the project dir and run `main.py` 
+```
+cd CycleGAN/
+python main.py
+```
+
+## ToDo
+- [ ] Simple argparse
+- [ ] Saving/Loading weights
+- [ ] Will probably add integration for W&B
 
 ## Results
 
