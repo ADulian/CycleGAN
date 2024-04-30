@@ -2,6 +2,7 @@
 Trainer class used to manage the training process of the model
 """
 
+import datetime
 import torch
 import numpy as np
 
@@ -35,10 +36,8 @@ class Trainer:
 
         """
 
-        # Path
-        self.output_path = Path("outputs") if output_path is None else Path(output_path)
-        if not self.output_path.exists():  # By default save in the wd
-            self.output_path.mkdir()
+        # Output Path
+        self.output_path = self.set_output_path(output_path=output_path)
 
         # On CPU by  default
         self.device = torch.device("cpu") if device is None else device
@@ -141,3 +140,32 @@ class Trainer:
 
         self.model.load_state_dict(torch.load(load_path))
         print(f"Weights loaded from: {load_path}")
+
+    # --------------------------------------------------------------------------------
+    def set_output_path(self,
+                        output_path=None):
+        """ Make a default output path
+
+        ---
+        Parameters
+            output_path: Output path
+
+        """
+
+        # Set output path if None given
+        if output_path is None:
+            # Format
+            date_time = datetime.datetime.now()
+            date_str = date_time.strftime('%Y_%m_%d')
+            time_str = date_time.strftime('%H_%M_%S')
+
+            # Set
+            output_path = Path("output") / date_str / time_str
+        else:
+            output_path = Path(output_path)
+
+        # Create if doesn't exist
+        if not output_path.exists():
+            output_path.mkdir(parents=True)
+
+        return output_path

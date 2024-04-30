@@ -19,6 +19,8 @@ if __name__ == '__main__':
                         help='Batch size for processing data (default: 64)')
     parser.add_argument('--weights_path', type=str, default=None, # Path to load weights
                         help='Load weights path')
+    parser.add_argument('--output_path', type=str, default=None,  # Path to saving data e.g. weights
+                        help='Save metadata in here')
 
 
     args = parser.parse_args()
@@ -26,6 +28,7 @@ if __name__ == '__main__':
     # Init trainer
     device = torch.device("cuda") if torch.cuda.is_available() else None
     trainer = Trainer(data_root=args.data_root,
+                      output_path=args.output_path,
                       batch_size=args.batch_size,
                       device=device)
 
