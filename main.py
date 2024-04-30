@@ -1,6 +1,7 @@
 """
 Main entrypoint, for now just training
 """
+import argparse
 import torch
 import numpy as np
 
@@ -12,12 +13,13 @@ from src.model.cycle_gan import CycleGAN
 from src.dataset.monet_dataset import MonetDataset
 
 # --------------------------------------------------------------------------------
-if __name__ == '__main__':
-
+def train(args):
+    """ Train the model
+    """
 
     # --- Params (Will put them later into argparse
-    NUM_EPOCHS = 1
-    BATCH_SIZE = 64
+    NUM_EPOCHS = args.num_epochs
+    BATCH_SIZE = args.batch_size
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -26,7 +28,7 @@ if __name__ == '__main__':
     cycle_gan = CycleGAN().to(device)
     cycle_gan.setup()
 
-    dataset = MonetDataset(root_path="data/")
+    dataset = MonetDataset(root_path=args.data_root)
     data_loader = DataLoader(dataset=dataset,
                              batch_size=BATCH_SIZE,
                              shuffle=True,
@@ -65,3 +67,21 @@ if __name__ == '__main__':
             # Update mean loss for epoch
             for k, v in loss_batch.items():
                 loss_epoch[k].append(np.mean(v))
+
+# --------------------------------------------------------------------------------
+if __name__ == '__main__':
+
+    # --- Args
+    parser = argparse.ArgumentParser(description='Simple implementation of CycleGAN in PyTorch')
+    parser.add_argument('--data_root', type=str, default="data/",
+                        help='Root path to dataset')
+    parser.add_argument('--num_epochs', type=int, default=1,
+                        help='Number of training epochs')
+    parser.add_argument('--batch_size', type=int, default=32,
+                        help='Batch size for processing data (default: 32)')
+
+    args = parser.parse_args()
+
+    # --- Train
+    train(args)
+

@@ -25,14 +25,13 @@ You can download the dataset directly from the following Kaggle's [website](http
   - photo_jpg/  # All photos
 ```
 
-Once you've got your dataset and virtualenv all in place, navigate to the project dir and run `main.py` 
+Once you've got your dataset and virtualenv all in place, navigate to the project dir and run `main.py` with relevant arguments. For example, the following will train the model on a `batch_size=64` and for `num_epochs=10` whilst loading data from `data_root=/data`: 
 ```
 cd CycleGAN/
-python main.py
+python main.py --data_root=/data --batch_size=64 --num_epochs=10
 ```
 
 ## ToDo
-- [ ] Simple argparse
 - [ ] Saving/Loading weights
 - [ ] Will probably add integration for W&B
 
