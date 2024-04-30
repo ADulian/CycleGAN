@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     # --- Params (Will put them later into argparse
     NUM_EPOCHS = 1
-    BATCH_SIZE = 32
+    BATCH_SIZE = 64
 
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     cycle_gan = CycleGAN().to(device)
     cycle_gan.setup()
 
-    dataset = MonetDataset(root_path="../data")
+    dataset = MonetDataset(root_path="data/")
     data_loader = DataLoader(dataset=dataset,
                              batch_size=BATCH_SIZE,
                              shuffle=True,
