@@ -51,10 +51,10 @@ class MonetDataset(Dataset):
 
         """
         # Get a photo path
-        path_photo = self.root_path / "photo_jpg" / self.photo_paths[idx]
+        path_photo = self.photo_paths[idx]
 
         # Get a random monet path
-        path_monet = self.root_path / "monet_jpg" / random.choices(self.monet_paths, k=1)[0]
+        path_monet = random.choices(self.monet_paths, k=1)[0]
 
         # Load imgs and transform
         x_photo = self.to_tensor(self.read_img(path_photo))

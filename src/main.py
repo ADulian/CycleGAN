@@ -26,7 +26,7 @@ if __name__ == '__main__':
     cycle_gan = CycleGAN().to(device)
     cycle_gan.setup()
 
-    dataset = MonetDataset(root_path="D:\\Kaggle\\Datasets\\Claude_Monet")
+    dataset = MonetDataset(root_path="../data")
     data_loader = DataLoader(dataset=dataset,
                              batch_size=BATCH_SIZE,
                              shuffle=True,
