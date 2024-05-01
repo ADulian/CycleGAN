@@ -72,6 +72,67 @@ class CycleGAN(nn.Module):
 
         return self.gen_monet(x)
 
+    # --------------------------------------------------------------------------------
+    def forward_apply_style(self,
+                            real_A,
+                            style="monet"):
+        """
+
+        ---
+        Parameters
+            real_A: A batch of real samples from domain A being transfered to domain B
+            style: Domain B, Applies either monet or photo style
+
+        """
+
+        # Set networks and Domain
+        if style == "monet":
+            domain_A = "photo"
+
+            gen_A = self.gen_photo
+            gen_B = self.gen_monet
+
+            disc_A = self.disc_photo
+            disc_B = self.disc_monet
+        elif style == "photo":
+            domain_A = "monet"
+
+            gen_A = self.gen_photo
+            gen_B = self.gen_monet
+
+            disc_A = self.disc_photo
+            disc_B = self.disc_monet
+        else:
+            raise ValueError(f"Style can be either monet or photo, given: {style}")
+
+        # Style is always domain B
+        domain_B = style
+
+        # ---
+        # Forward, notation uses P=Photo and M=Monet to easier demonstrate the flow
+        # x_P -> G_M -> \hat{x}_M
+        fake_B = gen_B(real_A)
+
+        # \hat{x}_M -> G_P -> \hat{x}_P
+        cycled_A = gen_A(fake_B)
+
+        # \hat{x}_M -> D_M -> \hat{y}_M
+        disc_fake_B = disc_B(fake_B)
+
+        # x_P -> D_P -> y_P
+        disc_real_A = disc_A(real_A)
+
+        # \hat{x}_P -> D_M -> \hat{y}_P
+        disc_cycled_A = disc_A(cycled_A)
+
+        return {f"fake_{domain_B}" : fake_B,
+                f"cycled_{domain_A}" : cycled_A,
+                f"disc_fake_{domain_B}" : disc_fake_B,
+                f"disc_real_{domain_A}" : disc_real_A,
+                f"disc_cycled_{domain_A}" : disc_cycled_A}
+
+
+    # --------------------------------------------------------------------------------
     def forward_step(self, x):
         """ A single forward step for the model
 
