@@ -31,9 +31,9 @@ cd CycleGAN/
 python main.py --data_root=/data --batch_size=64 --num_epochs=10
 ```
 
-## ToDo
-- [ ] Saving/Loading weights
-- [ ] Will probably add integration for W&B
+### Weight and Biases
+If you want to use Weights and Biases just call `Trainer.fit_wandb(**kwargs)`. This will initialise WandB Project with a default name of `Monet_CycleGAN` so either modify this or make that project in your WandB account.<br> 
+To watch the model set `--wandb_watch=True`
 
 ## Results
 
