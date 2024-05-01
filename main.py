@@ -2,7 +2,6 @@
 Main entrypoint, for now just training
 """
 import argparse
-import sys
 
 import torch
 
@@ -24,11 +23,16 @@ if __name__ == '__main__':
                         help='Number of training epochs')
     parser.add_argument('--batch_size', type=int, default=64,  # Max that fits onto 24GB GPU
                         help='Batch size for processing data, mine\'s set to max for 3090 24GB')
-    parser.add_argument('--weights_path', type=str, default=None, # Path to load weights
+    parser.add_argument('--lr', type=float, default=2e-3,
+                        help='Learning rate')
+    parser.add_argument('--weights_path', type=str, default=None,  # Path to load weights
                         help='Weights path, loads only if not None')
     parser.add_argument('--output_path', type=str, default=None,  # Path to saving data e.g. weights
                         help='Save all data in "." if None')
-
+    parser.add_argument('--wandb', type=bool, default=False,
+                        help='User Weights and Biases')
+    parser.add_argument('--wandb_watch', type=bool, default=False,  # Watch model with wandb
+                        help='Save all data in "." if None')
 
     args = parser.parse_args()
     if args.load_subset > 1.:
@@ -36,12 +40,13 @@ if __name__ == '__main__':
 
     # Init trainer
     device = torch.device("cuda") if torch.cuda.is_available() else None
-    trainer = Trainer(data_root=args.data_root,
-                      load_subset=args.load_subset,
-                      output_path=args.output_path,
-                      batch_size=args.batch_size,
-                      device=device)
+    trainer = Trainer(device=device,
+                      **vars(args))
 
     # Fit
-    trainer.fit(num_epochs=args.num_epochs,
-                load_weights_path=args.weights_path)
+    if args.wandb:
+        trainer.fit_wandb(num_epochs=args.num_epochs,
+                          load_weights_path=args.weights_path)
+    else:
+        trainer.fit(num_epochs=args.num_epochs,
+                    load_weights_path=args.weights_path)

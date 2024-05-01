@@ -6,3 +6,4 @@ numpy==1.26.4
 opencv_python==4.9.0.80
 pytest==8.2.0
 tqdm==4.66.2
+wandb==0.16.6

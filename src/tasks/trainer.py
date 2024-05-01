@@ -8,6 +8,8 @@ import random
 import numpy as np
 
 from collections import defaultdict
+
+import wandb
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from pathlib import Path
@@ -34,7 +36,10 @@ class Trainer:
                  load_subset=None,
                  output_path=None,
                  batch_size=32,
-                 device=None):
+                 lr=2e-4,
+                 device=None,
+                 wandb_watch=False,
+                 **kwargs):
         """ Initialise the Trainer class
 
         ---
@@ -43,19 +48,29 @@ class Trainer:
             load_subset: Load only subset of data, either num of samples (int) or proportion (float 0-1)
             output_path: Path where outputs will be saved
             batch_size: Data loader batch size
+            lr: Learning rate
             device: Device, if None then CPU will be used
+            wandb_watch: Watch model with wandb
 
         """
 
         # Output Path
         self.output_path = self.set_output_path(output_path=output_path)
 
+        # Set config
+        self.config = kwargs
+        self.config["load_subset"] = load_subset
+        self.config["output_path"] = self.output_path
+        self.config["batch_size"] = batch_size
+        self.config["lr"] = lr
+        self.config["wandb_watch"] = wandb_watch
+
         # On CPU by  default
         self.device = torch.device("cpu") if device is None else device
 
         # Init Model, Dataset and Data Loader
         # Probably bit of an overkill but might be useful to have access to those in notebooks
-        self.model = CycleGAN()
+        self.model = CycleGAN(lr=lr)
         self.dataset = MonetDataset(root_path=data_root,
                                     load_subset=load_subset)
         self.data_loader = DataLoader(dataset=self.dataset,
@@ -63,6 +78,22 @@ class Trainer:
                                       shuffle=True,
                                       pin_memory=True,
                                       num_workers=4)
+
+    # --------------------------------------------------------------------------------
+    def fit_wandb(self,
+                  **kwargs):
+        """ Fit and initialise with wandb
+
+        This will set wandb.run to not be None and log bunch of things
+
+        ---
+        Parameters
+            **kwargs: same paramters as to self.fit()
+
+        """
+
+        with wandb.init(project="Monet_CycleGAN", config=self.config):
+            self.fit(**kwargs)
 
     # --------------------------------------------------------------------------------
     def fit(self,
@@ -85,13 +116,24 @@ class Trainer:
         if load_weights_path is not None:
             self.load_weights(load_path=load_weights_path)
 
+        # --- WandB settings
+        if wandb.run is not None:
+            wandb.config["num_epochs"] = num_epochs
+            wandb.config["save_weights"] = save_weights
+            wandb.config["weights_path"] = load_weights_path
+
+            a = wandb.config
+            if wandb.config.wandb_watch:
+                wandb.watch(self.model,
+                            log="all", log_freq=10)
+
         # --- Train
-        loss_epoch = defaultdict(list)
-        for i in range(1, num_epochs + 1):  # Starting at one for tqdm
+        trainig_iter = 0
+        for i in range(num_epochs):
 
             # Tqdm
             with tqdm(total=len(self.data_loader),
-                      desc=f"Epoch {i}/{num_epochs}",
+                      desc=f"Epoch {i + 1}/{num_epochs}",
                       ascii=True,
                       colour="green",
                       dynamic_ncols=True) as pbar:
@@ -113,9 +155,19 @@ class Trainer:
                     pbar.set_postfix({k: v.item() for k, v in loss.items()})
                     pbar.update()
 
-                # Update mean loss for epoch
-                for k, v in loss_batch.items():
-                    loss_epoch[k].append(np.mean(v))
+                    # Step WandB Update
+                    if wandb.run is not None:
+                        loss = {f"step_{k}" : v for k, v in loss.items()}
+                        wandb.log(loss, step=trainig_iter)
+
+                    # Update iteration
+                    trainig_iter += 1
+
+                # Epoch WandB Update
+                if wandb.run is not None:
+                    mean_loss_batch = {f"epoch_{k}" : np.mean(v) for k, v in loss_batch.items()}
+                    mean_loss_batch["epoch"] = i
+                    wandb.log(mean_loss_batch, step=trainig_iter)
 
         # Save weights of the final model
         if save_weights:
