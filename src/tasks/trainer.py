@@ -4,6 +4,7 @@ Trainer class used to manage the training process of the model
 
 import datetime
 import torch
+import random
 import numpy as np
 
 from collections import defaultdict
@@ -15,6 +16,14 @@ from src.model.cycle_gan import CycleGAN
 from src.dataset.monet_dataset import MonetDataset
 
 # --------------------------------------------------------------------------------
+# Ensure deterministic behavior
+torch.backends.cudnn.deterministic = True
+random.seed(hash("setting random seeds") % 2**32 - 1)
+np.random.seed(hash("improves reproducibility") % 2**32 - 1)
+torch.manual_seed(hash("by removing stochasticity") % 2**32 - 1)
+torch.cuda.manual_seed_all(hash("so runs are repeatable") % 2**32 - 1)
+
+# --------------------------------------------------------------------------------
 class Trainer:
     """ Trainer manages the training process and anything related to it (e.g. loading/saving weights)
     """
@@ -22,6 +31,7 @@ class Trainer:
     # --------------------------------------------------------------------------------
     def __init__(self,
                  data_root,
+                 load_subset=None,
                  output_path=None,
                  batch_size=32,
                  device=None):
@@ -30,6 +40,7 @@ class Trainer:
         ---
         Parameters
             data_root: Path to dataset
+            load_subset: Load only subset of data, either num of samples (int) or proportion (float 0-1)
             output_path: Path where outputs will be saved
             batch_size: Data loader batch size
             device: Device, if None then CPU will be used
@@ -45,7 +56,8 @@ class Trainer:
         # Init Model, Dataset and Data Loader
         # Probably bit of an overkill but might be useful to have access to those in notebooks
         self.model = CycleGAN()
-        self.dataset = MonetDataset(root_path=data_root)
+        self.dataset = MonetDataset(root_path=data_root,
+                                    load_subset=load_subset)
         self.data_loader = DataLoader(dataset=self.dataset,
                                       batch_size=batch_size,
                                       shuffle=True,

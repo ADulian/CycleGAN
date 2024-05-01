@@ -18,7 +18,8 @@ class MonetDataset(Dataset):
 
     # --------------------------------------------------------------------------------
     def __init__(self,
-                 root_path):
+                 root_path,
+                 load_subset=None):
         """ Init Monet Dataset
         """
 
@@ -26,6 +27,25 @@ class MonetDataset(Dataset):
         self.root_path = Path(root_path)
         self.monet_paths = list((self.root_path / "monet_jpg").iterdir())
         self.photo_paths = list((self.root_path / "photo_jpg").iterdir())
+
+        # Load subset of dataset
+        if load_subset is not None:
+            if isinstance(load_subset, float):
+                if load_subset > 1. or load_subset < 0. :
+                    raise ValueError(f"Proportion given must be between 0-1. Got {load_subset}")
+
+                load_subset = int(len(self.photo_paths) * load_subset)
+            elif not isinstance(load_subset, int):
+                raise ValueError("load_subset must be int (number of samples) or float (proportion of dataset 0-1)."
+                                 f" Got: {type(load_subset)}")
+
+            # Try to randomly sample subset of dataset
+            try:
+                self.photo_paths = random.sample(self.photo_paths, load_subset)
+            # Negative or too large
+            except ValueError as e:
+                raise ValueError(f"{e}. Number of samples: {len(self.monet_paths)}")
+
 
     # --------------------------------------------------------------------------------
     def __len__(self):

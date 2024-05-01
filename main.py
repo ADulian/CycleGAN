@@ -17,6 +17,9 @@ if __name__ == '__main__':
 
     parser.add_argument('--data_root', type=str, default="data/",
                         help='Root path to dataset')
+    parser.add_argument('--load_subset', type=float, default=None,
+                        help='Load subset of the data, either num samples (> 1) or proportion (float 0-1). '
+                             'To get one sample just do 1.1 as the float is cast down to int')
     parser.add_argument('--num_epochs', type=int, default=1,
                         help='Number of training epochs')
     parser.add_argument('--batch_size', type=int, default=64,  # Max that fits onto 24GB GPU
@@ -28,10 +31,13 @@ if __name__ == '__main__':
 
 
     args = parser.parse_args()
+    if args.load_subset > 1.:
+        args.load_subset = int(args.load_subset)
 
     # Init trainer
     device = torch.device("cuda") if torch.cuda.is_available() else None
     trainer = Trainer(data_root=args.data_root,
+                      load_subset=args.load_subset,
                       output_path=args.output_path,
                       batch_size=args.batch_size,
                       device=device)
