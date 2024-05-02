@@ -36,7 +36,7 @@ Running with Weights and Biases, also setting `wandb.watch(model)` to `True`
 ```
 python main.py --wandb=True --wandb_watch=True
 ```
-If you're not using `main.py` you can use `Trainer` clas as standalone manager for training the model. The standard way of fitting with `Trainer` is by calling `Trainer.fit(**kwargs)`, however, if you want to run `fit` with `wandb` then instead use `Trainer.fit_wandb(**kwargs)` which just wraps `fit(**kwargs)` into the `wandb` context manager that initialises `wandb` project with a default name of `Monet_CycleGAN` which you can either modify or make the project in your `wandb` account.
+If you're not using `main.py` you can use `Trainer` class as standalone manager for training the model. The standard way of fitting with `Trainer` is by calling `Trainer.fit(**kwargs)`, however, if you want to run `fit` with `wandb` then instead use `Trainer.fit_wandb(**kwargs)` which just wraps `fit(**kwargs)` into the `wandb` context manager that initialises `wandb` project with a default name of `Monet_CycleGAN` which you can either modify or make the project in your `wandb` account.
 
 ## Results
 
