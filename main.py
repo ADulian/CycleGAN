@@ -35,7 +35,7 @@ if __name__ == '__main__':
                         help='Save all data in "." if None')
 
     args = parser.parse_args()
-    if args.load_subset > 1.:
+    if args.load_subset is not None and args.load_subset > 1.:
         args.load_subset = int(args.load_subset)
 
     # Init trainer
