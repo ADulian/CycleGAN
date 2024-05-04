@@ -76,54 +76,65 @@ class CycleGAN(nn.Module):
     def forward_apply_style(self,
                             real_A,
                             style="monet"):
-        """
+        """ Apply one of the styles either monet or photo
+
+        In addition the function returns more than just styled photo e.g.
+        Disciminators on Fake, Real and Cycled Photo
 
         ---
         Parameters
             real_A: A batch of real samples from domain A being transfered to domain B
             style: Domain B, Applies either monet or photo style
 
+        ---
+        Returns
+            dict: Dictionary of outputs from model
+
         """
 
-        # Set networks and Domain
-        if style == "monet":
-            domain_A = "photo"
+        with torch.inference_mode(mode=True):
+            self.eval()
 
-            gen_A = self.gen_photo
-            gen_B = self.gen_monet
 
-            disc_A = self.disc_photo
-            disc_B = self.disc_monet
-        elif style == "photo":
-            domain_A = "monet"
+            # Set networks and Domain
+            if style == "monet":
+                domain_A = "photo"
 
-            gen_A = self.gen_photo
-            gen_B = self.gen_monet
+                gen_A = self.gen_photo
+                gen_B = self.gen_monet
 
-            disc_A = self.disc_photo
-            disc_B = self.disc_monet
-        else:
-            raise ValueError(f"Style can be either monet or photo, given: {style}")
+                disc_A = self.disc_photo
+                disc_B = self.disc_monet
+            elif style == "photo":
+                domain_A = "monet"
 
-        # Style is always domain B
-        domain_B = style
+                gen_A = self.gen_photo
+                gen_B = self.gen_monet
 
-        # ---
-        # Forward, notation uses P=Photo and M=Monet to easier demonstrate the flow
-        # x_P -> G_M -> \hat{x}_M
-        fake_B = gen_B(real_A)
+                disc_A = self.disc_photo
+                disc_B = self.disc_monet
+            else:
+                raise ValueError(f"Style can be either monet or photo, given: {style}")
 
-        # \hat{x}_M -> G_P -> \hat{x}_P
-        cycled_A = gen_A(fake_B)
+            # Style is always domain B
+            domain_B = style
 
-        # \hat{x}_M -> D_M -> \hat{y}_M
-        disc_fake_B = disc_B(fake_B)
+            # ---
+            # Forward, notation uses P=Photo and M=Monet to easier demonstrate the flow
+            # x_P -> G_M -> \hat{x}_M
+            fake_B = gen_B(real_A)
 
-        # x_P -> D_P -> y_P
-        disc_real_A = disc_A(real_A)
+            # \hat{x}_M -> G_P -> \hat{x}_P
+            cycled_A = gen_A(fake_B)
 
-        # \hat{x}_P -> D_M -> \hat{y}_P
-        disc_cycled_A = disc_A(cycled_A)
+            # \hat{x}_M -> D_M -> \hat{y}_M
+            disc_fake_B = disc_B(fake_B)
+
+            # x_P -> D_P -> y_P
+            disc_real_A = disc_A(real_A)
+
+            # \hat{x}_P -> D_M -> \hat{y}_P
+            disc_cycled_A = disc_A(cycled_A)
 
         return {f"fake_{domain_B}" : fake_B,
                 f"cycled_{domain_A}" : cycled_A,
