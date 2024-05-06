@@ -1,5 +1,6 @@
 """ A simple tool for image exploration in Notebooks
 """
+import numpy as np
 import matplotlib.pyplot as plt
 
 from ipywidgets import Button, Output, HBox
@@ -100,6 +101,11 @@ class ImageExplorer:
         """
 
         fig, axs = plt.subplots(self.n_rows, self.n_cols, figsize=self.figsize)
+        if self.n_rows == 1:
+            axs = axs[np.newaxis, :]
+        elif self.n_cols == 1:
+            axs = axs[:, np.newaxis]
+
         for i in range(self.n_rows):
             for j in range(self.n_cols):
                 idx = self.current_index + i * self.n_cols + j
@@ -127,6 +133,8 @@ class ImageExplorer:
             Anything that plt.imshow() is happy with
 
         """
+        if self.dataset is None:
+            raise ValueError("Dataset is None, can't retrieve a sample")
 
         return self.dataset[idx]
 
