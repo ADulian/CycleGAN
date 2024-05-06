@@ -98,16 +98,12 @@ class CycleGAN(nn.Module):
 
             # Set networks and Domain
             if style == "monet":
-                domain_A = "photo"
-
                 gen_A = self.gen_photo
                 gen_B = self.gen_monet
 
                 disc_A = self.disc_photo
                 disc_B = self.disc_monet
             elif style == "photo":
-                domain_A = "monet"
-
                 gen_A = self.gen_photo
                 gen_B = self.gen_monet
 
@@ -115,9 +111,6 @@ class CycleGAN(nn.Module):
                 disc_B = self.disc_monet
             else:
                 raise ValueError(f"Style can be either monet or photo, given: {style}")
-
-            # Style is always domain B
-            domain_B = style
 
             # ---
             # Forward, notation uses P=Photo and M=Monet to easier demonstrate the flow
@@ -136,11 +129,12 @@ class CycleGAN(nn.Module):
             # \hat{x}_P -> D_M -> \hat{y}_P
             disc_cycled_A = disc_A(cycled_A)
 
-        return {f"fake_{domain_B}" : fake_B,
-                f"cycled_{domain_A}" : cycled_A,
-                f"disc_fake_{domain_B}" : disc_fake_B,
-                f"disc_real_{domain_A}" : disc_real_A,
-                f"disc_cycled_{domain_A}" : disc_cycled_A}
+        return {"real_A" : real_A,
+                "gen_fake_B" : fake_B,
+                "gen_cycled_A" : cycled_A,
+                "disc_fake_B" : disc_fake_B,
+                "disc_real_A" : disc_real_A,
+                "disc_cycled_A" : disc_cycled_A}
 
 
     # --------------------------------------------------------------------------------
