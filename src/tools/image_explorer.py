@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from ipywidgets import Button, Output, HBox
 from IPython.display import display, clear_output
 
+
 # --------------------------------------------------------------------------------
 class ImageExplorer:
     """ Simple tool for viewing images in notebooks
@@ -14,7 +15,12 @@ class ImageExplorer:
     """
 
     # --------------------------------------------------------------------------------
-    def __init__(self, dataset, n_rows=3, n_cols=3, figsize=(12, 12)):
+    def __init__(self,
+                 dataset=None,
+                 num_samples=None,
+                 n_rows=3,
+                 n_cols=3,
+                 figsize=(12, 12)):
         """ Initialise the Image Explorer
 
         How to:
@@ -27,17 +33,21 @@ class ImageExplorer:
         ---
         Parameters
             dataset: Dataset class, can be anything (torch.Dataset recommended) as long as it implements len()
+            num_samples: If dataset is None then num of samples can also be specified via this arg
             n_rows: Number of rows
             n_cols: Number of columns
             figsize: Figure size
 
         """
+        if dataset is None and num_samples is None:
+            raise ValueError("Either Dataset or num_samples must be given, both are None")
+
         self.dataset = dataset
         self.n_rows = n_rows
         self.n_cols = n_cols
         self.figsize = figsize
         self.total_images = n_rows * n_cols
-        self.num_samples = len(dataset)
+        self.num_samples = len(dataset) if dataset is not None else num_samples
         self.current_index = 0
 
         self.output_widget = Output()
