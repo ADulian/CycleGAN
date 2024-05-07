@@ -21,6 +21,7 @@ class GANExplorer(ImageExplorer):
                  dataset,
                  batch_size=8,
                  style_b="monet",
+                 render_discriminator=True,
                  *args, **kwargs):
         """ Init Gan Explorer
 
@@ -30,8 +31,10 @@ class GANExplorer(ImageExplorer):
             dataset: Monet-Photos Dataset
             batch_size: Buffer of samples per single inference run
             style_b: Style (Domain) B, i.e. the one that is being applied to Domain A
+            render_discriminator: If True it will render output of discriminator too (heatmap)
         """
-        super().__init__(dataset=dataset, num_samples=batch_size, *args, **kwargs)
+        super().__init__(dataset=dataset, num_samples=batch_size,
+                         *args, **kwargs)
 
         self.model = model
         self.model_output = None
@@ -42,6 +45,12 @@ class GANExplorer(ImageExplorer):
         self.total_images = self.n_rows
         self.dataset_prev_index = 0
         self.dataset_next_index = 0
+        self.render_discriminator = render_discriminator
+
+        # Update col number of figsize
+        if self.render_discriminator:
+            self.n_cols *= 2
+            self.figsize =  (self.figsize[0] * 2, self.figsize[1])
 
     # --------------------------------------------------------------------------------
     def _on_up_click(self, button):
@@ -99,18 +108,26 @@ class GANExplorer(ImageExplorer):
         for i in range(self.n_rows):
             idx = self.current_index + i
             if idx < self.num_samples:
-                real_A, fake_B, cycled_A = self._get_model_sample(idx=idx)
-                gan_output = [real_A, fake_B, cycled_A]
-
-                assert len(gan_output) == self.n_cols
+                real_A, fake_B, cycled_A, disc_real_A, disc_fake_B, disc_cycled_A = self._get_model_sample(idx=idx)
+                gan_output = [real_A, fake_B, cycled_A,
+                              disc_real_A, disc_fake_B, disc_cycled_A]
 
                 for j in range(self.n_cols):
                     axs[i, j].imshow(gan_output[j])
                     axs[i, j].set_xticks([])
                     axs[i, j].set_yticks([])
 
+                    if self.render_discriminator:
+                        if j >= self.n_cols // 2:
+                            axs[i, j].set_xlabel(f"Discriminator Mean: {gan_output[j].mean():.2f}",
+                                                 fontsize=12)
+                    else:
+                        axs[i, j].set_xlabel(f"Discriminator Mean: {gan_output[j + self.n_cols].mean():.2f}",
+                                             fontsize=12)
+
         # Set shared titles
-        titles = ["Real A", "Fake B", "Cycled A"]
+        titles = ["Real A", "Fake B", "Cycled A",
+                  "Disc Real A (\u2191)", "Disc Fake B (\u2193)", "Disc Cycled A (\u2191)"]
         for i in range(self.n_cols):
             axs[0, i].set_title(titles[i])
 
@@ -152,7 +169,12 @@ class GANExplorer(ImageExplorer):
         fake_B = self._to_numpy(self.model_output["gen_fake_B"][idx])
         cycled_A = self._to_numpy(self.model_output["gen_cycled_A"][idx])
 
-        return real_A, fake_B, cycled_A
+        # And disc
+        disc_real_A = self._to_numpy(self.model_output["disc_real_A"][idx])
+        disc_fake_B = self._to_numpy(self.model_output["disc_fake_B"][idx])
+        disc_cycled_A = self._to_numpy(self.model_output["disc_cycled_A"][idx])
+
+        return real_A, fake_B, cycled_A, disc_real_A, disc_fake_B, disc_cycled_A
 
     # --------------------------------------------------------------------------------
     def _get_prev_samples(self):
