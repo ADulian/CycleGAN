@@ -1,10 +1,14 @@
 """ An extension of the Image Explorer tool made specifically for visualisation of CycleGANs
 """
 
+import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
+from IPython.display import clear_output
+
 from src.tools.image_explorer import ImageExplorer
+
 
 # --------------------------------------------------------------------------------
 class GANExplorer(ImageExplorer):
@@ -12,15 +16,32 @@ class GANExplorer(ImageExplorer):
     """
 
     # --------------------------------------------------------------------------------
-    def __init__(self, model_out, *args, **kwargs):
+    def __init__(self,
+                 model,
+                 dataset,
+                 batch_size=8,
+                 style_b="monet",
+                 *args, **kwargs):
         """ Init Gan Explorer
+
+        ---
+        Parameters
+            model: Cycle GAN
+            dataset: Monet-Photos Dataset
+            batch_size: Buffer of samples per single inference run
+            style_b: Style (Domain) B, i.e. the one that is being applied to Domain A
         """
+        super().__init__(dataset=dataset, num_samples=batch_size, *args, **kwargs)
 
-        self.model_out = model_out
-
-        super().__init__(num_samples=len(model_out), *args, **kwargs)
-
+        self.model = model
+        self.model_output = None
+        self.style_b = style_b
+        self.style_a = "monet" if style_b == "photo" else "photo"
+        self.max_samples = len(dataset.monet_paths) if style_b == "photo" else len(dataset.photo_paths)
+        self.batch_size = min(batch_size, self.max_samples)
         self.total_images = self.n_rows
+        self.dataset_prev_index = 0
+        self.dataset_next_index = 0
 
     # --------------------------------------------------------------------------------
     def _on_up_click(self, button):
@@ -39,13 +60,29 @@ class GANExplorer(ImageExplorer):
         self._update_display()
 
     # --------------------------------------------------------------------------------
+    def _update_display(self):
+        """ Update figure
+        """
+
+        # If current index is beyond/above min/max run inference
+        if self.current_index < 0:
+            self._get_prev_samples()
+        elif self.current_index > (self.num_samples - self.total_images) \
+                or self.model_output is None:
+            self._get_next_samples()
+
+        with self.output_widget:
+            clear_output(wait=True)
+            self._display_images()
+
+    # --------------------------------------------------------------------------------
     def _display_images(self):
         """ Display GAN output in the following format
 
         Single row = data from a single sample
             C1 - Real A
             C2 - Fake B
-            c3 - Cycled A
+            C3 - Cycled A
 
         For now it just shows the output of generator but next feature
         will involve adding the discriminator ouput in a form a heatmap
@@ -62,7 +99,7 @@ class GANExplorer(ImageExplorer):
         for i in range(self.n_rows):
             idx = self.current_index + i
             if idx < self.num_samples:
-                real_A, fake_B, cycled_A = self._get_gan_sample(idx=idx)
+                real_A, fake_B, cycled_A = self._get_model_sample(idx=idx)
                 gan_output = [real_A, fake_B, cycled_A]
 
                 assert len(gan_output) == self.n_cols
@@ -78,9 +115,8 @@ class GANExplorer(ImageExplorer):
 
         plt.show()
 
-
     # --------------------------------------------------------------------------------
-    def _get_gan_sample(self, idx):
+    def _get_model_sample(self, idx):
         """ Get a sample from model's output
 
         ---
@@ -97,16 +133,106 @@ class GANExplorer(ImageExplorer):
 
         """
 
+        # Check if model output exists
+        if self.model_output is None:
+            raise ValueError("Model Output is None, run inference first")
+
         # Set to last idx
         if idx >= self.num_samples:
             idx = self.num_samples - 1
 
         # Get output of gen
-        real_A = self._to_numpy(self.model_out["real_A"][idx])
-        fake_B = self._to_numpy(self.model_out["gen_fake_B"][idx])
-        cycled_A = self._to_numpy(self.model_out["gen_cycled_A"][idx])
+        real_A = self._to_numpy(self.model_output["real_A"][idx])
+        fake_B = self._to_numpy(self.model_output["gen_fake_B"][idx])
+        cycled_A = self._to_numpy(self.model_output["gen_cycled_A"][idx])
 
         return real_A, fake_B, cycled_A
+
+    # --------------------------------------------------------------------------------
+    def _get_prev_samples(self):
+        """ Get previous samples from dataset (n=batch_size) and run inference
+        """
+        # Beyond first set of samples
+        if self.dataset_prev_index < 0:
+            self.current_index = 0
+        else:
+            # Get n samples
+            samples = []
+            for i in range(self.batch_size):
+
+                samples.append(self.dataset.get_sample(idx=self.dataset_prev_index,
+                                                       as_tensor=True,
+                                                       sample_type=self.style_a))
+                self.dataset_prev_index -= 1
+                if self.dataset_prev_index < 0:
+                    break
+
+            samples = torch.stack(samples[::-1], dim=0)
+
+            # Inference
+            model_output = self.model.forward_apply_style(samples,
+                                                          style=self.style_b)
+
+            # Merge
+            num_next_elements = self.n_rows - 1
+            if num_next_elements > 0:  # Only a case if n_rows == 1
+                for k in self.model_output:
+                    next_output = self.model_output[k][:num_next_elements]
+                    self.model_output[k] = torch.cat((model_output[k], next_output))
+                self.current_index = len(samples) + num_next_elements - self.n_rows
+            else:
+                self.model_output = model_output
+                self.current_index = 0
+
+            # Update
+            self.num_samples = len(samples) + num_next_elements
+            self.dataset_next_index = self.dataset_prev_index + self.num_samples + 1
+
+    # --------------------------------------------------------------------------------
+    def _get_next_samples(self):
+        """ Get next samples from dataset (n=batch_size) and run inference
+        """
+
+        # End of dataset
+        if self.dataset_next_index == self.max_samples:
+            self.current_index = self.num_samples - self.n_rows
+        else:
+            # Get N samples
+            samples = []
+            for i in range(self.batch_size):
+                samples.append(self.dataset.get_sample(idx=self.dataset_next_index,
+                                                       as_tensor=True,
+                                                       sample_type=self.style_a))
+                self.dataset_next_index += 1
+                if self.dataset_next_index == self.max_samples:
+                    break
+
+            # Stack
+            samples = torch.stack(samples, dim=0)
+
+            # Inference
+            model_output = self.model.forward_apply_style(samples,
+                                                          style=self.style_b)
+
+            # Initial entry
+            if self.model_output is None:
+                self.model_output = model_output
+                self.num_samples = len(samples)
+            # If not None, merge output of n_rows - 1
+            else:
+                num_prev_elements = self.n_rows - 1
+                if num_prev_elements > 0:
+                    for k in self.model_output:
+                        prev_output = self.model_output[k][-num_prev_elements:]
+                        self.model_output[k] = torch.cat((prev_output, model_output[k]))
+                else:
+                    self.model_output = model_output
+
+                self.num_samples = len(samples) + num_prev_elements
+
+            # Update indices
+            self.dataset_prev_index = self.dataset_next_index - self.num_samples - 1
+            self.current_index = 0
 
     # --------------------------------------------------------------------------------
     def _to_numpy(self, torch_tensor):

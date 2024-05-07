@@ -48,7 +48,7 @@ class ImageExplorer:
         self.n_cols = n_cols
         self.figsize = figsize
         self.total_images = n_rows * n_cols
-        self.num_samples = len(dataset) if dataset is not None else num_samples
+        self.num_samples = num_samples if num_samples is not None else len(dataset)
         self.current_index = 0
 
         self.output_widget = Output()
