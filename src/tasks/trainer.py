@@ -169,9 +169,9 @@ class Trainer:
                     mean_loss_batch["epoch"] = i
                     wandb.log(mean_loss_batch, step=trainig_iter)
 
-        # Save weights of the final model
-        if save_weights:
-            self.save_weights()
+            # Save weights of the final model
+            if save_weights:
+                self.save_weights()
 
     # --------------------------------------------------------------------------------
     def save_weights(self,
