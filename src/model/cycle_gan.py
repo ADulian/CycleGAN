@@ -95,7 +95,6 @@ class CycleGAN(nn.Module):
         with torch.inference_mode(mode=True):
             self.eval()
 
-
             # Set networks and Domain
             if style == "monet":
                 gen_A = self.gen_photo

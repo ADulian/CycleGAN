@@ -106,12 +106,18 @@ class GANExplorer(ImageExplorer):
 
                 for j in range(self.n_cols):
                     axs[i, j].imshow(gan_output[j])
-                    axs[i, j].axis('off')
+                    axs[i, j].set_xticks([])
+                    axs[i, j].set_yticks([])
 
         # Set shared titles
         titles = ["Real A", "Fake B", "Cycled A"]
         for i in range(self.n_cols):
             axs[0, i].set_title(titles[i])
+
+        # Set row titles just as ylabel
+        for i in range(self.n_rows):
+            axs[i, 0].set_ylabel(f"Sample idx: {self.dataset_prev_index + i + 1 + self.current_index}",
+                                 fontsize=12)
 
         plt.show()
 
