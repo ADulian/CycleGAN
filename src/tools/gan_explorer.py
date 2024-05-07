@@ -99,6 +99,9 @@ class GANExplorer(ImageExplorer):
         """
 
         fig, axs = plt.subplots(self.n_rows, self.n_cols, figsize=self.figsize)
+        fig.suptitle(f"From {self.style_a.capitalize()} (A) To {self.style_b.capitalize()} (B)",
+                     fontsize=16, y=0.925)
+
         if self.n_rows == 1:
             axs = axs[np.newaxis, :]
         elif self.n_cols == 1:
@@ -127,7 +130,7 @@ class GANExplorer(ImageExplorer):
 
         # Set shared titles
         titles = ["Real A", "Fake B", "Cycled A",
-                  "Disc Real A (\u2191)", "Disc Fake B (\u2193)", "Disc Cycled A (\u2191)"]
+                  "Disc Real A (\u2191)", "Disc Fake B (\u2193)", "Disc Cycled A (\u2193)"]
         for i in range(self.n_cols):
             axs[0, i].set_title(titles[i])
 
@@ -135,7 +138,6 @@ class GANExplorer(ImageExplorer):
         for i in range(self.n_rows):
             axs[i, 0].set_ylabel(f"Sample idx: {self.dataset_prev_index + i + 1 + self.current_index}",
                                  fontsize=12)
-
         plt.show()
 
     # --------------------------------------------------------------------------------
@@ -152,7 +154,9 @@ class GANExplorer(ImageExplorer):
                 real_A: Input to the model
                 fake_B: Input transformed into domain B
                 cycled_A: Input cycled back from B to A
-
+                disc_real_A: Results of discriminator on Real A
+                disc_fake_B: Results of disciminator on Fake B
+                disc_cycled_A: Results of discriminator on Cycled A
 
         """
 

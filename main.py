@@ -23,7 +23,7 @@ if __name__ == '__main__':
                         help='Number of training epochs')
     parser.add_argument('--batch_size', type=int, default=64,  # Max that fits onto 24GB GPU
                         help='Batch size for processing data, mine\'s set to max for 3090 24GB')
-    parser.add_argument('--lr', type=float, default=2e-3,
+    parser.add_argument('--lr', type=float, default=2e-4,
                         help='Learning rate')
     parser.add_argument('--weights_path', type=str, default=None,  # Path to load weights
                         help='Weights path, loads only if not None')
