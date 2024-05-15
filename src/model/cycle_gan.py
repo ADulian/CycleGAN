@@ -173,12 +173,12 @@ class CycleGAN(nn.Module):
 
         # --- Discriminators
         # Monet
-        d_real_monet = self.disc_monet(x_monet, sample_history=True)  # How real does this real monet seems
-        d_fake_monet = self.disc_monet(x_fake_monet.detach(), sample_history=True)  # How fake does this fake seems
+        d_real_monet = self.disc_monet(x_monet)  # How real does this real monet seems
+        d_fake_monet = self.disc_monet(x_fake_monet.detach())  # How fake does this fake seems
 
         # Photo
-        d_real_photo = self.disc_photo(x_photo, sample_history=True)
-        d_fake_photo = self.disc_photo(x_fake_photo.detach(), sample_history=True)
+        d_real_photo = self.disc_photo(x_photo)
+        d_fake_photo = self.disc_photo(x_fake_photo.detach())
 
         # Discriminators Loss
         d_loss_monet = self.disc_loss(x_real=d_real_monet,
@@ -198,8 +198,8 @@ class CycleGAN(nn.Module):
 
         # --- Generators
         # Adversarial
-        x_adv_monet = self.disc_monet(x_fake_monet, sample_history=False)  # How real does this fake monet seems
-        x_adv_photo = self.disc_photo(x_fake_photo, sample_history=False)
+        x_adv_monet = self.disc_monet(x_fake_monet)  # How real does this fake monet seems
+        x_adv_photo = self.disc_photo(x_fake_photo)
 
         # Cycle
         x_cycled_monet = self.gen_monet(x_fake_photo)  # Fake Photo -> Gm -> Cycled Monet

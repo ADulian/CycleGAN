@@ -33,7 +33,7 @@ class Discriminator(nn.Module):
         kernel_size = 4
 
         # --- History
-        self.history = DiscriminatorHistory(batch_size=4)
+        # self.history = DiscriminatorHistory(batch_size=4)
 
         # --- Discriminator network
         self.discriminator = nn.Sequential(
@@ -58,8 +58,7 @@ class Discriminator(nn.Module):
 
     # --------------------------------------------------------------------------------
     def forward(self,
-                x,
-                sample_history=False):
+                x):
         """ Discriminate between real/fake img
 
         ---
@@ -72,11 +71,6 @@ class Discriminator(nn.Module):
             torch.Tensor: Output tensor (pred grid)
 
         """
-
-        # Update x based on history
-        if self.history is not None:
-            x = self.history(x)
-
 
         return self.discriminator(x)
 
