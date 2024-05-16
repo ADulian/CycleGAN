@@ -39,14 +39,10 @@ python main.py --wandb=True --wandb_watch=True
 If you're not using `main.py` you can use `Trainer` class as standalone manager for training the model. The standard way of fitting with `Trainer` is by calling `Trainer.fit(**kwargs)`, however, if you want to run `fit` with `wandb` then instead use `Trainer.fit_wandb(**kwargs)` which just wraps `fit(**kwargs)` into the `wandb` context manager that initialises `wandb` project with a default name of `Monet_CycleGAN` which you can either modify or make the project in your `wandb` account.
 
 ## Results
-### Baseline Experiment
-Some results from initial experiment. The model was trained with default settings of `lr=2e-4` and `epochs=15`. I tried number of different runs with more epochs, various lrs as well as different order of loss and backward computation to ensure that everything is in the right oder. All seems good and with this baseline I get a score of about 79.99 on Kaggle which is pretty poor. 
+Checkout the `results` directory to see some sample images from various experiments and see how the model evolved over time.
 
-**Photo -> Monet**
-The fake photos with monet style at least look similar to real ones with some visible changes to the style. It's not yet a proper Monet but Discriminator already has issues recognising it as a fake, same for the cycled images which look pretty good.<br>
-![CycleGAN Example](/figures/photo_monet.png)
+## CycleGAN Output Explorer
+I thought it might be useful to be able to visualise the output of CycleGAN in sort of a live mode. Therefore, I decided to write a simple and interactive tool to explore how the input of the Generator gets transformed from domain `A` to `B` and back to `A` (cycle) and also see how the Discriminator judges its input. In a case of a CycleGAN the output of a Discriminator is not a single value (`True/False` or `Real/Fake`), but rather a grid. That grid can be visualised to see which areas of an input are more likely to be judged as `Real/Fake`. 
 
-**Monet -> Photo**
-The fake monet with photo style is pretty similar to the other output, i.e. some style but not really photo style, Discriminator is leaning more towards real on fakes as well. One thing that I've noticed with some trained models is weird artifacts in fake outputs of Generators, for instance, a grid like (small) artifact appearing in the corner of images, exactly in the same spots, random patterns. Seems like Generators must've learned to fool Discriminators with that particular set of artifacts/features. This is not so apparent with the output of that baseline model but I can still see grid like structure applied to the fake outputs.
-![CycleGAN Example](/figures/monet_photo.png)
-
+Below is a small demonstration of the tool. To use it, simply run the following notebook `notebooks/qualitative_eval.ipynb`.
+![CycleGAN Explorer](/figures/cycle_gan_explorer.gif)
