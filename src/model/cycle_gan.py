@@ -174,11 +174,11 @@ class CycleGAN(nn.Module):
         # --- Discriminators
         # Monet
         d_real_monet = self.disc_monet(x_monet)  # How real does this real monet seems
-        d_fake_monet = self.disc_monet(x_fake_monet.detach())  # How fake does this fake seems
+        d_fake_monet = self.disc_monet(x_fake_monet.detach(), sample_history=True)  # How fake does this fake seems
 
         # Photo
         d_real_photo = self.disc_photo(x_photo)
-        d_fake_photo = self.disc_photo(x_fake_photo.detach())
+        d_fake_photo = self.disc_photo(x_fake_photo.detach(), sample_history=True)
 
         # Discriminators Loss
         d_loss_monet = self.disc_loss(x_real=d_real_monet,

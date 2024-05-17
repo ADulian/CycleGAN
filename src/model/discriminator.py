@@ -33,7 +33,7 @@ class Discriminator(nn.Module):
         kernel_size = 4
 
         # --- History
-        # self.history = DiscriminatorHistory(batch_size=4)
+        self.history = DiscriminatorHistory()
 
         # --- Discriminator network
         self.discriminator = nn.Sequential(
@@ -58,7 +58,8 @@ class Discriminator(nn.Module):
 
     # --------------------------------------------------------------------------------
     def forward(self,
-                x):
+                x,
+                sample_history=False):
         """ Discriminate between real/fake img
 
         ---
@@ -72,27 +73,35 @@ class Discriminator(nn.Module):
 
         """
 
+        # Update x based on history
+        if sample_history:
+            x = self.history(x)
+
+
         return self.discriminator(x)
 
 # --------------------------------------------------------------------------------
 class DiscriminatorHistory:
     """ Keep a history of fake samples that Discriminator can use to improve its robustness
-
-    The history has a buffer size B that is set to N*Batch Size, as the N increases so does
-    the variation of samples, initially I guess that a larger variation might be useful but
-    as the model learns it is probably safe to keep it smaller
-
     """
 
     # --------------------------------------------------------------------------------
     def __init__(self,
-                 batch_size,
-                 n=2):
-        """ Init History module"""
+                 buffer_size=50):
+        """ Init History module
 
-        self.sample_size = batch_size // 2
-        self.buffer_size = batch_size * n
-        self.data_indices = list(range(0, self.buffer_size))
+        ---
+        Parameters
+            buffer_size: Size of the buffer, as per paper the defualt is 50
+
+        The paper says "We keep an image buffer that stores the 50 previously created images",
+        however, what's worth noting is that the authors used a batch size of 1 for training,
+        meaning that the network did 50 updates before sampling from history. Worth rethinking
+        whether the buffer_size should be dependant on the batch_size
+
+        """
+
+        self.buffer_size = buffer_size
 
         # Empty Tensor
         self.buffer = torch.Tensor()
@@ -122,17 +131,22 @@ class DiscriminatorHistory:
         # Check if buffer is filled
         if len(self.buffer) >= self.buffer_size:
             # Sample from the buffer
-            history_indices = random.sample(self.data_indices, k=self.sample_size)
-            x1 = self.buffer[history_indices]
+            sample_size = max(len(x) // 2, 1)
+            history_indices = list(range(0, self.buffer_size))
+            history_get_indices = random.sample(history_indices, k=sample_size)
+            x1 = self.buffer[history_get_indices]
+
+            if sample_size == 1:
+                return x1
 
             # Sample from the input
             x_indices = list(range(0, len(x)))
-            x_get_indices = random.sample(x_indices, k=self.sample_size)
+            x_get_indices = random.sample(x_indices, k=sample_size)
             x_set_indices = list(set(x_indices) - set(x_get_indices))
             x2 = x[x_get_indices]
 
             # Replace buffer with other set of samples
-            self.buffer[history_indices] = x[x_set_indices]
+            self.buffer[history_get_indices] = x[x_set_indices]
 
             # Concat
             x = torch.cat((x1, x2), 0)
