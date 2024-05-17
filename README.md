@@ -42,12 +42,14 @@ If you're not using `main.py` you can use `Trainer` class as standalone manager 
 Checkout the `results` directory to see some sample images from various experiments and see how the model evolved over time.
 
 ## ToDo
-- [ ] Discriminators History
-- [ ] Identity Loss
+- [x] Discriminators History
+- [ ] Correct Loss functions
+- [ ] Identity Loss function
 - [ ] Better Architecture, acutally based on the paper
 
 ## CycleGAN Output Explorer
 I thought it might be useful to be able to visualise the output of CycleGAN in sort of a live mode. Therefore, I decided to write a simple and interactive tool to explore how the input of the Generator gets transformed from domain `A` to `B` and back to `A` (cycle) and also see how the Discriminator judges its input. In a case of a CycleGAN the output of a Discriminator is not a single value (`True/False` or `Real/Fake`), but rather a grid. That grid can be visualised to see which areas of an input are more likely to be judged as `Real/Fake`. 
 
-Below is a small demonstration of the tool. To use it, simply run the following notebook `notebooks/qualitative_eval.ipynb`.
+Below is a small demonstration of the tool. To use it, simply run the following notebook `notebooks/qualitative_eval.ipynb`
+
 ![CycleGAN Explorer](/figures/cycle_gan_explorer.gif)
