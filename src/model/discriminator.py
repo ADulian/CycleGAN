@@ -21,7 +21,8 @@ class Discriminator(nn.Module):
     """
 
     # --------------------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self,
+                 d_history=50):
         """ Init CycleGAN's Discriminator
 
         """
@@ -33,7 +34,7 @@ class Discriminator(nn.Module):
         kernel_size = 4
 
         # --- History
-        self.history = DiscriminatorHistory()
+        self.history = DiscriminatorHistory(buffer_size=d_history)
 
         # --- Discriminator network
         self.discriminator = nn.Sequential(

@@ -25,6 +25,8 @@ if __name__ == '__main__':
                         help='Batch size for processing data, mine\'s set to max for 3090 24GB')
     parser.add_argument('--lr', type=float, default=2e-4,
                         help='Learning rate')
+    parser.add_argument("--d_history", type=int, default=50,
+                        help="Size of the Discriminator History")
     parser.add_argument('--weights_path', type=str, default=None,  # Path to load weights
                         help='Weights path, loads only if not None')
     parser.add_argument('--output_path', type=str, default=None,  # Path to saving data e.g. weights

@@ -24,7 +24,8 @@ class CycleGAN(nn.Module):
     # --------------------------------------------------------------------------------
     def __init__(self,
                  lr = 2e-4,
-                 lambda_cycle = 10):
+                 lambda_cycle = 10,
+                 d_history = 50):
         """ Init CycleGan
         """
 
@@ -34,8 +35,8 @@ class CycleGAN(nn.Module):
         self.gen_monet = Generator()
         self.gen_photo = Generator()
 
-        self.disc_monet = Discriminator()
-        self.disc_photo = Discriminator()
+        self.disc_monet = Discriminator(d_history=d_history)
+        self.disc_photo = Discriminator(d_history=d_history)
 
         # --- Attributes
         self.lambda_cycle = lambda_cycle  # Cycle loss weight

@@ -37,6 +37,7 @@ class Trainer:
                  output_path=None,
                  batch_size=32,
                  lr=2e-4,
+                 d_history=50,
                  device=None,
                  wandb_watch=False,
                  **kwargs):
@@ -70,7 +71,8 @@ class Trainer:
 
         # Init Model, Dataset and Data Loader
         # Probably bit of an overkill but might be useful to have access to those in notebooks
-        self.model = CycleGAN(lr=lr)
+        self.model = CycleGAN(lr=lr,
+                              d_history=d_history)
         self.dataset = MonetDataset(root_path=data_root,
                                     load_subset=load_subset)
         self.data_loader = DataLoader(dataset=self.dataset,
